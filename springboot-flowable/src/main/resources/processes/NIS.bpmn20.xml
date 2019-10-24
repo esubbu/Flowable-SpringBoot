@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:flowable="http://flowable.org/bpmn"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+	xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+	typeLanguage="http://www.w3.org/2001/XMLSchema"
+	expressionLanguage="http://www.w3.org/1999/XPath"
+	targetNamespace="http://www.flowable.org/processdef">
+	<process id="NIS" name="NIS" isExecutable="true">
+		<startEvent id="startEvent1" name="Start Point"
+			flowable:formFieldValidation="true"></startEvent>
+		<exclusiveGateway
+			id="sid-5A005EF2-971D-4501-9A67-3510316992EE"
+			name="User opted &quot;Additional Programming support&quot;?"></exclusiveGateway>
+		<serviceTask id="sid-648F3F31-CF32-4F94-BBD9-C1D8B00757F7"
+			name="Fetch &quot;Project Notification Form&quot; values provided by user from DB"></serviceTask>
+		<exclusiveGateway
+			id="sid-F9692EE4-6B25-44B1-A8E6-589C57880B1C"
+			name="User opted &quot;Advance Analytical Tools&quot;?"></exclusiveGateway>
+		<serviceTask id="sid-7A455DA8-5DCC-4909-B901-BEEC630176A5"
+			name="System fetches &quot;Analysis Profile Form&quot; values provided by user from DB"></serviceTask>
+		<sequenceFlow
+			id="sid-F5CD0710-4210-4909-9F55-75974434BDB5" sourceRef="startEvent1"
+			targetRef="sid-7A455DA8-5DCC-4909-B901-BEEC630176A5"></sequenceFlow>
+		<serviceTask id="sid-783D48CC-1E43-41B5-A95A-034754A7C808"
+			name="Create Bitbucket repository for user"></serviceTask>
+		<sequenceFlow
+			id="sid-77508D56-4D56-4590-AD4D-3CC62DB25818"
+			sourceRef="sid-7A455DA8-5DCC-4909-B901-BEEC630176A5"
+			targetRef="sid-F9692EE4-6B25-44B1-A8E6-589C57880B1C"></sequenceFlow>
+		<endEvent id="sid-A8C38A9E-2D1D-467D-AD98-FC713A5F0D86"
+			name="End Point"></endEvent>
+		<sequenceFlow
+			id="sid-4F7DDEFF-1114-4C5C-8C22-A6FBA129B55E" name="Yes"
+			sourceRef="sid-F9692EE4-6B25-44B1-A8E6-589C57880B1C"
+			targetRef="sid-783D48CC-1E43-41B5-A95A-034754A7C808"></sequenceFlow>
+		<sequenceFlow
+			id="sid-FFD4FF9B-EB4C-4AB6-9CDB-D4D0D48757DD" name="Yes"
+			sourceRef="sid-5A005EF2-971D-4501-9A67-3510316992EE"
+			targetRef="sid-648F3F31-CF32-4F94-BBD9-C1D8B00757F7"></sequenceFlow>
+		<serviceTask id="sid-7DAC997E-8CFF-449D-92AC-D65D0808EAE4"
+			name="Manager receives a URL with request  to assign a dev"
+			flowable:type="mail"></serviceTask>
+		<userTask id="sid-FAD8232A-1F01-455C-99EB-DB021724770E"
+			name="Manager assigns a dev" flowable:formFieldValidation="true"></userTask>
+		<sequenceFlow
+			id="sid-73A4C717-FD44-464F-8A75-A2DD665CB7F3"
+			sourceRef="sid-783D48CC-1E43-41B5-A95A-034754A7C808"
+			targetRef="sid-5A005EF2-971D-4501-9A67-3510316992EE"></sequenceFlow>
+		<sequenceFlow
+			id="sid-8DAAAC6F-84E9-4096-901E-610D02A01C45"
+			sourceRef="sid-7DAC997E-8CFF-449D-92AC-D65D0808EAE4"
+			targetRef="sid-FAD8232A-1F01-455C-99EB-DB021724770E"></sequenceFlow>
+		<sequenceFlow
+			id="sid-070BBE1F-C7DB-4F50-A19B-56CFA519C31F"
+			sourceRef="sid-648F3F31-CF32-4F94-BBD9-C1D8B00757F7"
+			targetRef="sid-7DAC997E-8CFF-449D-92AC-D65D0808EAE4"></sequenceFlow>
+		<sequenceFlow
+			id="sid-16EABB33-572E-48D1-A660-089BEE2603AD" name="No"
+			sourceRef="sid-5A005EF2-971D-4501-9A67-3510316992EE"
+			targetRef="sid-A8C38A9E-2D1D-467D-AD98-FC713A5F0D86"></sequenceFlow>
+		<sequenceFlow
+			id="sid-31C9BF9A-282D-42E3-A877-5E6398A1E5BE"
+			sourceRef="sid-FAD8232A-1F01-455C-99EB-DB021724770E"
+			targetRef="sid-A8C38A9E-2D1D-467D-AD98-FC713A5F0D86"></sequenceFlow>
+		<sequenceFlow
+			id="sid-440B368D-A38F-4437-BAD3-3F692D38A6E4" name="No"
+			sourceRef="sid-F9692EE4-6B25-44B1-A8E6-589C57880B1C"
+			targetRef="sid-A8C38A9E-2D1D-467D-AD98-FC713A5F0D86"></sequenceFlow>
+	</process>
+	
+</definitions>
