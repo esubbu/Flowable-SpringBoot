@@ -14,47 +14,49 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.deloitte.flowable.domain.Approval;
 import com.deloitte.flowable.domain.Article;
-
+import com.deloitte.flowable.domain.User;
 
 @Service
-public class ArticleWorkflowService {
-    @Autowired
+public class NisWorkflowService {
+	
+	@Autowired
     private RuntimeService runtimeService;
     @Autowired
     private TaskService taskService;
 
     @Transactional
-    public void startProcess(Article article) {
+    public void startProcess(User user) {
         Map<String, Object> variables = new HashMap<String, Object>();
-        variables.put("author", article.getAuthor());
-        variables.put("url", article.getUrl());
-        runtimeService.startProcessInstanceByKey("articleReview1", variables);
+        variables.put("userName", user.getUserName());
+		/* variables.put("support", true); */
+        runtimeService.startProcessInstanceByKey("nisworkflow", variables);
     }
 
     @Transactional
-    public List<Article> getTasks(String assignee) {
+    public List<User> getTasks(String assignee) {
         List<Task> tasks = taskService.createTaskQuery()
-          .taskCandidateGroup(assignee)
+				/* .taskCandidateGroup(assignee) */
+          .active()
           .list();
         
         
-        List<Article> articles = tasks.stream()
+        List<User> users = tasks.stream()
           .map(task -> {
               Map<String, Object> variables = taskService.getVariables(task.getId());
-              return new Article(
-                task.getId(), (String) variables.get("author"), (String) variables.get("url"));
+              return new User(
+                task.getId(), (String) variables.get("userName"),(String) variables.get("role"));
           })
           .collect(Collectors.toList());
-        return articles;
+        return users;
     }
 
     @Transactional
-    public void submitReview(Approval approval) {
+    public void submitSupport(Approval approval) {
         Map<String, Object> variables = new HashMap<String, Object>();
-        variables.put("approved", approval.isStatus());
+        variables.put("assigned", approval.isStatus());
 		
 		  List<Task> tasks = taskService.createTaskQuery()
-				  .processDefinitionKey("articleReview1")
+				  .processDefinitionKey("nisworkflow")
 				/*
 				 * .or().taskCandidateGroup(assignee) .or().taskAssignee("userName")
 				 */
@@ -67,4 +69,5 @@ public class ArticleWorkflowService {
         
         taskService.complete(approval.getId(), variables);
     }
+
 }

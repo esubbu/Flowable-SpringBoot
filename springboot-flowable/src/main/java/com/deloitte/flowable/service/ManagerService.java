@@ -3,8 +3,9 @@ package com.deloitte.flowable.service;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 
-public class SendMailService implements JavaDelegate {
+public class ManagerService implements JavaDelegate {
     public void execute(DelegateExecution execution) {
-        System.out.println("Sending mail to manager...");
+        System.out.println("Manager assinged a developer.");
     }
+
 }

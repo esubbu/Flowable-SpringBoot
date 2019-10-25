@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:flowable="http://flowable.org/bpmn"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+	xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+	typeLanguage="http://www.w3.org/2001/XMLSchema"
+	expressionLanguage="http://www.w3.org/1999/XPath"
+	targetNamespace="http://www.flowable.org/processdef">
+	<process id="nisworkflow" name="NISworkflow"
+		isExecutable="true">
+		<startEvent id="start" name="Initiate workflow"
+			flowable:formFieldValidation="true"></startEvent>
+		<serviceTask id="profileService"
+			name="System fetches &quot;Analysis Profile Form&quot; values provided by user from DB"
+			flowable:class="com.deloitte.flowable.service.ProfileWorkflowService"></serviceTask>
+		<serviceTask id="repoService"
+			name="Create Bitbucket repository for user"
+			flowable:expression="#{createRepositoryService.createBitBucketRepo(userName)}"
+			flowable:resultVariableName="support"
+			flowable:useLocalScopeForResultVariable="true"></serviceTask>
+		<exclusiveGateway id="supportDecision"
+			name="User opted &quot;Additional Programming support&quot;?"></exclusiveGateway>
+		<userTask id="managerTask"
+			name="Manager assigns a dev for support"
+			flowable:formFieldValidation="true"></userTask>
+		<endEvent id="end" name="End point"></endEvent>
+		<sequenceFlow
+			id="sid-5BBF3426-26B2-485C-AD7F-B3FEBE0FFA4C"
+			sourceRef="profileService" targetRef="repoService"></sequenceFlow>
+		<sequenceFlow
+			id="sid-219FC5B3-6EAD-49C8-8534-3B7A944E7D67" sourceRef="start"
+			targetRef="profileService"></sequenceFlow>
+		<serviceTask id="emailService"
+			name="Manager receives a URL with request  to assign a dev"
+			flowable:class="com.deloitte.flowable.service.SendMailService"></serviceTask>
+		<sequenceFlow
+			id="sid-9B3647E9-3283-41D6-A79A-5D326999F7F1" sourceRef="repoService"
+			targetRef="supportDecision"></sequenceFlow>
+		<sequenceFlow
+			id="sid-AE886E2D-6F0A-4882-B449-15D8C4F8251D"
+			sourceRef="emailService" targetRef="managerTask"></sequenceFlow>
+		<exclusiveGateway id="managerDecision"></exclusiveGateway>
+		<serviceTask id="assignDevService"
+			name="Assigning the dev"
+			flowable:class="com.deloitte.flowable.service.ManagerService"></serviceTask>
+		<sequenceFlow
+			id="sid-61BEBF6F-2D61-4BA2-80D8-15144CCF3EEA" sourceRef="managerTask"
+			targetRef="managerDecision"></sequenceFlow>
+		<sequenceFlow
+			id="sid-E14A93EF-1D7B-43C7-A7E2-C2452F535410"
+			sourceRef="assignDevService" targetRef="end"></sequenceFlow>
+		<sequenceFlow id="noSupport" name="No"
+			sourceRef="supportDecision" targetRef="end">
+			<conditionExpression xsi:type="tFormalExpression"><![CDATA[${!support}]]></conditionExpression>
+		</sequenceFlow>
+		<sequenceFlow id="additionalSupport" name="Yes"
+			sourceRef="supportDecision" targetRef="emailService">
+			<conditionExpression xsi:type="tFormalExpression"><![CDATA[${support}]]></conditionExpression>
+		</sequenceFlow>
+		<sequenceFlow id="noDev" name="dev Not assigned"
+			sourceRef="managerDecision" targetRef="end">
+			<conditionExpression xsi:type="tFormalExpression"><![CDATA[${!assigned}]]></conditionExpression>
+		</sequenceFlow>
+		<sequenceFlow id="yesDev" name="dev assigned"
+			sourceRef="managerDecision" targetRef="assignDevService">
+			<conditionExpression xsi:type="tFormalExpression"><![CDATA[${assigned}]]></conditionExpression>
+		</sequenceFlow>
+	</process>
+	<bpmndi:BPMNDiagram id="BPMNDiagram_nisworkflow">
+		<bpmndi:BPMNPlane bpmnElement="nisworkflow"
+			id="BPMNPlane_nisworkflow">
+			<bpmndi:BPMNShape bpmnElement="start"
+				id="BPMNShape_start">
+				<omgdc:Bounds height="30.0" width="30.0" x="210.0"
+					y="30.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="profileService"
+				id="BPMNShape_profileService">
+				<omgdc:Bounds height="80.0" width="100.0" x="175.0"
+					y="90.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="repoService"
+				id="BPMNShape_repoService">
+				<omgdc:Bounds height="80.0" width="100.0" x="174.5"
+					y="203.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="supportDecision"
+				id="BPMNShape_supportDecision">
+				<omgdc:Bounds height="40.0" width="40.0" x="205.0"
+					y="313.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="managerTask"
+				id="BPMNShape_managerTask">
+				<omgdc:Bounds height="80.0" width="100.0" x="175.0"
+					y="570.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="end"
+				id="BPMNShape_end">
+				<omgdc:Bounds height="28.0" width="28.0" x="405.0"
+					y="706.8888726411049"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="emailService"
+				id="BPMNShape_emailService">
+				<omgdc:Bounds height="75.0" width="98.0" x="175.0"
+					y="390.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="managerDecision"
+				id="BPMNShape_managerDecision">
+				<omgdc:Bounds height="40.0" width="40.0" x="205.0"
+					y="700.8888726411049"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="assignDevService"
+				id="BPMNShape_assignDevService">
+				<omgdc:Bounds height="80.0" width="100.00000000000006"
+					x="175.0" y="855.0"></omgdc:Bounds>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-E14A93EF-1D7B-43C7-A7E2-C2452F535410"
+				id="BPMNEdge_sid-E14A93EF-1D7B-43C7-A7E2-C2452F535410">
+				<omgdi:waypoint x="269.5135248824409" y="855.0"></omgdi:waypoint>
+				<omgdi:waypoint x="408.58074282523654"
+					y="730.2065512680266"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="yesDev"
+				id="BPMNEdge_yesDev">
+				<omgdi:waypoint x="225.44512195637014"
+					y="740.3881044666233"></omgdi:waypoint>
+				<omgdi:waypoint x="225.11505598923225" y="855.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-AE886E2D-6F0A-4882-B449-15D8C4F8251D"
+				id="BPMNEdge_sid-AE886E2D-6F0A-4882-B449-15D8C4F8251D">
+				<omgdi:waypoint x="224.0" y="464.95000000000005"></omgdi:waypoint>
+				<omgdi:waypoint x="224.0" y="517.5"></omgdi:waypoint>
+				<omgdi:waypoint x="225.0" y="517.5"></omgdi:waypoint>
+				<omgdi:waypoint x="225.0" y="570.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-61BEBF6F-2D61-4BA2-80D8-15144CCF3EEA"
+				id="BPMNEdge_sid-61BEBF6F-2D61-4BA2-80D8-15144CCF3EEA">
+				<omgdi:waypoint x="225.0" y="649.9499999999999"></omgdi:waypoint>
+				<omgdi:waypoint x="225.0" y="700.8888726411049"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="noDev"
+				id="BPMNEdge_noDev">
+				<omgdi:waypoint x="244.4941610564475"
+					y="721.3396498431775"></omgdi:waypoint>
+				<omgdi:waypoint x="405.0000429672841"
+					y="720.9249190997805"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-5BBF3426-26B2-485C-AD7F-B3FEBE0FFA4C"
+				id="BPMNEdge_sid-5BBF3426-26B2-485C-AD7F-B3FEBE0FFA4C">
+				<omgdi:waypoint x="224.8230088495575" y="169.95"></omgdi:waypoint>
+				<omgdi:waypoint x="224.67676991150444" y="203.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="additionalSupport"
+				id="BPMNEdge_additionalSupport">
+				<omgdi:waypoint x="224.79057591623035"
+					y="352.74109947643973"></omgdi:waypoint>
+				<omgdi:waypoint x="224.3962962962963" y="390.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="noSupport"
+				id="BPMNEdge_noSupport">
+				<omgdi:waypoint x="244.94496466431096" y="333.0"></omgdi:waypoint>
+				<omgdi:waypoint x="423.0" y="333.0"></omgdi:waypoint>
+				<omgdi:waypoint x="419.1438481432759"
+					y="706.8896016769841"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-9B3647E9-3283-41D6-A79A-5D326999F7F1"
+				id="BPMNEdge_sid-9B3647E9-3283-41D6-A79A-5D326999F7F1">
+				<omgdi:waypoint x="224.72194444444443"
+					y="282.95000000000005"></omgdi:waypoint>
+				<omgdi:waypoint x="224.88950276243094"
+					y="313.07201986754967"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge
+				bpmnElement="sid-219FC5B3-6EAD-49C8-8534-3B7A944E7D67"
+				id="BPMNEdge_sid-219FC5B3-6EAD-49C8-8534-3B7A944E7D67">
+				<omgdi:waypoint x="225.0" y="59.94999747184478"></omgdi:waypoint>
+				<omgdi:waypoint x="225.0" y="90.0"></omgdi:waypoint>
+			</bpmndi:BPMNEdge>
+		</bpmndi:BPMNPlane>
+	</bpmndi:BPMNDiagram>
+</definitions>

@@ -17,7 +17,9 @@ public class SpringbootFlowableApplication {
 		ProcessEngine processEngine=ProcessEngines.getDefaultProcessEngine();
 		  RepositoryService repositoryService = processEngine.getRepositoryService();
 		  Deployment deployment = repositoryService.createDeployment()
-		  .addClasspathResource("processes/article-workflow1.bpmn20.xml") .deploy();
+				/* .addClasspathResource("processes/article-workflow1.bpmn20.xml") */
+		  .addClasspathResource("processes/NISworkflow.bpmn20.xml")
+		  .deploy();
 		  
 		  ProcessDefinition processDefinition =
 		  repositoryService.createProcessDefinitionQuery()
